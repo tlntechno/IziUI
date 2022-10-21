@@ -1,0 +1,8 @@
+select.i-drop-cont,
+select.i-drop-cont>option {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -ms-appearance: none;
+    -o-appearance: none;
+    appearance: none;
+}
