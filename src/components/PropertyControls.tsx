@@ -15,9 +15,9 @@ export default function PropertyControls({ openStates, setOpenStates, styles, se
                     case "backgroundColor":
                     case "color":
                         return (
-                            <div key={uuidv4()}>
+                            openStates[key][valueKey] && <div key={uuidv4()}>
                                 {
-                                    openStates[key][valueKey] && <div key={uuidv4()} style={{ backgroundColor: "white", display: "flex", flexDirection: "column", zIndex: "100" }}>
+                                    <div key={uuidv4()} style={{ backgroundColor: "white", display: "flex", flexDirection: "column", zIndex: "100" }}>
                                         <HexColorPicker color={styles[key][valueKey]} onChange={(e) => setProperty(key, valueKey, e)} />
                                         <button onClick={() => setOpenStates({ ...openStates, [key]: { ...openStates[key], [valueKey]: false } })}>Save</button>
                                     </div>
@@ -30,9 +30,9 @@ export default function PropertyControls({ openStates, setOpenStates, styles, se
                     case "padding":
                     case "margin":
                         return (
-                            <div key={uuidv4()}>
+                            openStates[key][valueKey] && <div key={uuidv4()}>
                                 {
-                                    openStates[key][valueKey] && <div key={uuidv4()} style={{ backgroundColor: "white", display: "flex", flexDirection: "column", zIndex: "100" }}>
+                                    <div key={uuidv4()} style={{ backgroundColor: "white", display: "flex", flexDirection: "column", zIndex: "100" }}>
                                         <input type="text" value={styles[key][valueKey]} onChange={(e) => setProperty(key, valueKey, e.target.value)} />
                                         <button onClick={() => setOpenStates({ ...openStates, [key]: { ...openStates[key], [valueKey]: false } })}>Save</button>
                                     </div>
@@ -41,9 +41,9 @@ export default function PropertyControls({ openStates, setOpenStates, styles, se
                         )
                     default:
                         return (
-                            <div key={uuidv4()}>
+                            openStates[key][valueKey] && <div key={uuidv4()}>
                                 {
-                                    openStates[key][valueKey] && <div key={uuidv4()} style={{ backgroundColor: "white", display: "flex", flexDirection: "column", zIndex: "100" }}>
+                                    <div key={uuidv4()} style={{ backgroundColor: "white", display: "flex", flexDirection: "column", zIndex: "100" }}>
                                         <input type="text" value={styles[key][valueKey]} onChange={(e) => setProperty(key, valueKey, e.target.value)} />
                                         <button onClick={() => setOpenStates({ ...openStates, [key]: { ...openStates[key], [valueKey]: false } })}>Save</button>
                                     </div>
@@ -52,13 +52,11 @@ export default function PropertyControls({ openStates, setOpenStates, styles, se
                         )
                 }
             })
-
-
             return controls
         })
-
-
     }
+
+    
     return (
         <div style={{ position: "absolute", zIndex: "50", top: "10%"}}>{renderPropertyControls()}</div>
     )

@@ -1,6 +1,7 @@
 import React, { Children, cloneElement, useEffect, useReducer, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
-import { FaArrowsAltH } from 'react-icons/fa';
+import { FaArrowsAltH, FaArrowsAltV, FaCompressArrowsAlt, FaExpandArrowsAlt } from 'react-icons/fa';
+import { MdRoundedCorner } from 'react-icons/md';
 
 export default function ControlInterface({ children, openStates, setOpenStates, hoverStates, handleHover }) {
     const [controls, setControls] = useState([])
@@ -16,8 +17,8 @@ export default function ControlInterface({ children, openStates, setOpenStates, 
         if (!child.props || !child.props.id) return child;
         const childId = child.props.id;
         const cleanedId = childId.split("-")[0];
-        console.log(cleanedId);
-        
+        // console.log(cleanedId);
+
         const childStyles = Object.keys(child.props.style);
         const childStyleValues = Object.values(child.props.style);
         const controls = childStyles.map((style: string) => {
@@ -44,6 +45,10 @@ export default function ControlInterface({ children, openStates, setOpenStates, 
                         >
                             {style === "color" && "T"}
                             {style === "width" && <FaArrowsAltH fill='#FFF' />}
+                            {style === "height" && <FaArrowsAltV fill='#FFF' />}
+                            {style === "padding" && <FaCompressArrowsAlt fill='#FFF' />}
+                            {style === "margin" && <FaExpandArrowsAlt fill='#FFF' />}
+                            {style === "borderRadius" && <MdRoundedCorner fill='#FFF' />}
                         </div>
                     )
                 default:
@@ -57,47 +62,54 @@ export default function ControlInterface({ children, openStates, setOpenStates, 
                 key={childId}
                 id={childId + "-controls"}
                 onMouseOver={(e) => { e.stopPropagation(); handleHover(e) }}
-                style={{ display: "flex", flexDirection: "row", transform: "translate(-20px, -50%)", position: "absolute" }}
+                style={{ display: "flex", flexDirection: "row", transform: "translate(-20px, -75%)", position: "absolute", top: "0" }}
             // style={{ display: "flex", flexDirection: "row", transform: "translate(-10px, -50%)", position: childStyleValues.includes("absolute") ? "absolute" : "relative" }}
             >
                 {controls}
             </div>
         )
 
-        const newChildren = cloneElement(child, { children: [child.props.children, controlsContainer] })
+        // const newChildren = cloneElement(child, { children: [child.props.children, controlsContainer] })
 
-        return newChildren;
+        return controlsContainer;
     }
 
     function recursiveMap(children, root = false) {
+        // console.log({ children });
+        
         if (!Array.isArray(children)) {
             if (!children.props) return children;
             if (children.props.children && Array.isArray(children.props.children)) {
-                const parentWithControls = root && addControls(children);
+                const controls = addControls(children);
                 const recursiveChildren = children.props.children.map((child) => {
+                    const key = child.props.id + uuidv4();
                     if (child.props?.children) {
-                        const childWithControls = addControls(child);
-                        const key = child.props.id + uuidv4();
-                        return cloneElement(childWithControls, {
-                            children: [recursiveMap(child.props.children), childWithControls.props.children[1]],
+                        const controls = addControls(child);
+                        return cloneElement(child, {
+                            children: [recursiveMap(child.props.children), controls],
+                            key
+                        });
+                    } else {
+                        const shallowChildren = children;
+                        shallowChildren.push(controls)
+                        return cloneElement(child, {
+                            children: shallowChildren,
                             key
                         });
                     }
-                    return addControls(child)
                 })
                 const key = children.props.id + uuidv4();
 
-                if (!root) return cloneElement(children, { children: recursiveChildren, key });
-                return cloneElement(parentWithControls, {
-                    children: [recursiveMap(recursiveChildren), parentWithControls.props.children[1]],
+                return cloneElement(children, {
+                    children: [recursiveChildren, controls],
                     key
                 });
             }
             else if (children.props.children && typeof children.props.children === "object") {
                 const childWithControls = addControls(children);
                 const key = children.props.id + uuidv4();
-                return cloneElement(childWithControls, {
-                    children: [recursiveMap(children.props.children), childWithControls.props.children[1]],
+                return cloneElement(children, {
+                    children: [recursiveMap(children.props.children), childWithControls],
                     key
                 });
             }
@@ -105,16 +117,17 @@ export default function ControlInterface({ children, openStates, setOpenStates, 
         }
         else {
             return children.map((child) => {
+                const controls = child?.props?.style ? addControls(child) : child;
+                const key = child?.props?.id + uuidv4();
                 if (child?.props?.children) {
-                    const childWithControls = child.props.style ? addControls(child) : child;
-                    const key = child.props.id + uuidv4();
-
-                    return cloneElement(childWithControls, {
-                        children: [recursiveMap(child.props.children), childWithControls.props.children[1]],
+                    return cloneElement(child, {
+                        children: [recursiveMap(child.props.children), controls],
                         key: key
                     });
                 } else if (child?.props) {
-                    return addControls(child)
+                    return cloneElement(child, {
+                        key: key
+                    });
                 }
                 return child;
             });
@@ -128,7 +141,7 @@ export default function ControlInterface({ children, openStates, setOpenStates, 
 
     return (
         <div>
-            {controls}
+            {recursiveMap(children, true)}
         </div>
     )
 }

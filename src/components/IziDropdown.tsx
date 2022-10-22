@@ -101,31 +101,35 @@ export default function IziDropdown({
     <>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "300px", background: "rgb(213,2,223)", background: "linear-gradient(180deg, rgba(213,2,223,1) 0%, rgba(147,0,186,1) 0%, rgba(0,143,172,1) 100%)" }}>
         <PropertyControls openStates={openStates} setOpenStates={setOpenStates} styles={styles} setProperty={setProperty} />
+        {/* <div style={{ backgroundColor: "white", display: "flex", flexDirection: "column", zIndex: "100" }}>
+          <HexColorPicker color={styles.iziDropdownContainer.backgroundColor} onChange={(e) => setProperty("iziDropdownContainer", "backgroundColor", e)} />
+          <button onClick={() => setOpenStates({ ...openStates, [key]: { ...openStates[key], [valueKey]: false } })}>Save</button>
+        </div> */}
         <ControlInterface openStates={openStates} setOpenStates={setOpenStates} hoverStates={hoverStates} handleHover={handleHover}>
-          <div
-            style={customIziDropdownContainer}
-            id="iziDropdownContainer"
-            onMouseOver={(e) => handleHover(e)}
-            onMouseOut={(e) => handleHover(e)}
+        <div
+          style={customIziDropdownContainer}
+          id="iziDropdownContainer"
+          onMouseOver={(e) => handleHover(e)}
+          onMouseOut={(e) => handleHover(e)}
 
+        >
+          <span
+            style={styles.iziDropdownSelected}
+            id="iziDropdownSelected"
+            onMouseOver={(e) => handleHover(e)}
           >
-            <span
-              style={styles.iziDropdownSelected}
-              id="iziDropdownSelected"
+            {selectedOption}
+          </span>
+          {open &&
+            <div
+              style={styles.iziDropdownOptionContainer}
+              id="iziDropdownOptionContainer"
               onMouseOver={(e) => handleHover(e)}
             >
-              {selectedOption}
-            </span>
-            {open &&
-              <div
-                style={styles.iziDropdownOptionContainer}
-                id="iziDropdownOptionContainer"
-                onMouseOver={(e) => handleHover(e)}
-              >
-                {iziOptions()}
-              </div>
-            }
-          </div>
+              {iziOptions()}
+            </div>
+          }
+        </div>
         </ControlInterface>
       </div>
       <div style={{ height: "100%", padding: "30px", backgroundColor: "white", color: "black" }}>
