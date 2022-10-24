@@ -14,7 +14,7 @@ export default function ControlInterface({ children, openStates, setOpenStates, 
     })
 
     function addControls(child) {
-        if (!child.props || !child.props.id) return child;
+        if (!child.props || !child.props.id) return null;
         const childId = child.props.id;
         const cleanedId = childId.split("-")[0];
         // console.log(cleanedId);
@@ -22,6 +22,38 @@ export default function ControlInterface({ children, openStates, setOpenStates, 
         const childStyles = Object.keys(child.props.style);
         const childStyleValues = Object.values(child.props.style);
         const controls = childStyles.map((style: string) => {
+            function icon() {
+                let icon = null
+                switch (style) {
+                    case "color":
+                        icon = <p style={{ color: "white", mixBlendMode: "difference" }}>T</p>;
+                        break;
+                    case "width":
+                        icon = <FaArrowsAltH />;
+                        break;
+                    case "height":
+                        icon = <FaArrowsAltV />;
+                        break;
+                    case "borderRadius":
+                        icon = <MdRoundedCorner />;
+                        break;
+                    case "padding":
+                        icon = <FaCompressArrowsAlt />;
+                        break;
+                    case "margin":
+                        icon = <FaExpandArrowsAlt />;
+                        break;
+                    default:
+                        return null;
+                }
+                return (
+                    <>
+                        <div style={{ position: "absolute", inset: "0", backgroundColor: "transparent", width: "100%", height: "100%" }} id={childId + "-controls"}
+                            onMouseOver={(e) => { e.stopPropagation(); handleHover(e); console.log("hovered", e.target) }}></div>
+                        {icon}
+                    </>
+                )
+            }
             switch (style) {
                 case "backgroundColor":
                 case "color":
@@ -39,16 +71,19 @@ export default function ControlInterface({ children, openStates, setOpenStates, 
                             onClick={(e) => { e.stopPropagation; setOpenStates({ ...openStates, [childId]: { ...openStates[childId], [style]: true } }) }}
                             className="control"
                             style={{
+                                // @ts-ignore
                                 backgroundColor: style === "backgroundColor" || style === "color" ? childStyleValues[childStyles.indexOf(style)] : "",
                                 color: "white",
                             }}
                         >
-                            {style === "color" && "T"}
-                            {style === "width" && <FaArrowsAltH fill='#FFF' />}
-                            {style === "height" && <FaArrowsAltV fill='#FFF' />}
-                            {style === "padding" && <FaCompressArrowsAlt fill='#FFF' />}
-                            {style === "margin" && <FaExpandArrowsAlt fill='#FFF' />}
-                            {style === "borderRadius" && <MdRoundedCorner fill='#FFF' />}
+                            {style !== "backgroundColor" &&
+                                <span
+                                    id={childId + "-controls"}
+                                    onMouseOver={(e) => { e.stopPropagation(); handleHover(e) }}
+                                    style={{ position: "relative", width: "100%", height: "20px", display: "flex", justifyContent: "center", alignItems: "center" }}
+                                >
+                                    {icon()}
+                                </span>}
                         </div>
                     )
                 default:
@@ -62,7 +97,7 @@ export default function ControlInterface({ children, openStates, setOpenStates, 
                 key={childId}
                 id={childId + "-controls"}
                 onMouseOver={(e) => { e.stopPropagation(); handleHover(e) }}
-                style={{ display: "flex", flexDirection: "row", transform: "translate(-20px, -75%)", position: "absolute", top: "0" }}
+                style={{ display: "flex", flexDirection: "row", transform: "translate(-20px, -50%)", position: "absolute", top: "0" }}
             // style={{ display: "flex", flexDirection: "row", transform: "translate(-10px, -50%)", position: childStyleValues.includes("absolute") ? "absolute" : "relative" }}
             >
                 {controls}
@@ -76,7 +111,7 @@ export default function ControlInterface({ children, openStates, setOpenStates, 
 
     function recursiveMap(children, root = false) {
         // console.log({ children });
-        
+
         if (!Array.isArray(children)) {
             if (!children.props) return children;
             if (children.props.children && Array.isArray(children.props.children)) {

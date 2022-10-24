@@ -1,73 +1,65 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import stylesToCss from 'util/stylesToCss'
 import { HexColorPicker } from "react-colorful";
 import ControlInterface from './ControlInterface';
 import PropertyControls from './PropertyControls';
 import { hoverStatesCalc, openStatesCalc } from 'util/statesCalc';
+import { CopyBlock, atomOneDark } from "react-code-blocks";
+import "highlight.js/styles/atom-one-dark.css";
 
 export default function IziDropdown({
   options,
-  initialOption,
   open,
-  setOpen,
   selectedOption,
   styles,
   setProperty
 }) {
 
-  // const [openStates, setOpenStates] = useState({
-  //   iziDropdownContainer: {
-  //     backgroundColor: false,
-  //     width: false,
-  //     height: false,
-  //     position: false,
-  //     border: false,
-  //     borderRadius: false,
-  //     userSelect: false,
-  //     margin: false,
-  //   },
-  //   iziDropdownOptionContainer: {
-  //     display: false,
-  //     flexDirection: false,
-  //     position: false,
-  //     top: false,
-  //     left: false,
-  //     width: false,
-  //     height: false,
-  //     backgroundColor: false,
-  //     outline: false,
-  //   },
-  //   iziDropdownOption: {
-  //     backgroundColor: false,
-  //     width: false,
-  //     height: false,
-  //     top: false,
-  //     left: false,
-  //     padding: false,
-  //     color: false,
-  //   },
-  //   iziDropdownSelected: {
-  //     position: false,
-  //     inset: false,
-  //     width: false,
-  //     height: false,
-  //     color: false,
-  //     padding: false,
-  //   }
-  // });
-
   const [openStates, setOpenStates] = useState(openStatesCalc(styles))
   const [hoverStates, setHoverStates] = useState(null)
-  const timeOutRef = React.useRef(null);
+  const [timeOut, setTimeOut] = useState(true)
+  const [showMore, setShowMore] = useState({
+    0: false,
+    1: false,
+  })
+  const [overFlown, setOverFlown] = useState({
+    0: false,
+    1: false,
+  })
+  const codeMarkup = `
+  <div className='iziDropdownContainer' onClick={setOpen}>
+    <p className='iziDropdownSelected'>{selectedOption}</p>
+    {open &&
+      <div className='iziDropdownOptionContainer'>
+        {iziOptions()}
+      </div>
+    }
+  </div>
+  <div className='iziDropdownContainer' onClick={setOpen}>
+    <p className='iziDropdownSelected'>{selectedOption}</p>
+    {open &&
+      <div className='iziDropdownOptionContainer'>
+        {iziOptions()}
+      </div>
+    }
+  </div>
+  `
 
   function iziOptions() {
     return options.map((option, index) => {
+      const e = {
+        target: {
+          id: `iziDropdownOption`,
+        }
+      }
+
       return (
         <div
           key={`dropDownOption${index}`}
           style={styles.iziDropdownOption}
-          id="iziDropdownOption"
-          onMouseOver={(e) => handleHover(e)}
+          id={index === 0 ? "iziDropdownOption" : null}
+          onMouseOver={(e) => handleHover(e, "iziDropdownOption")}
+          onMouseOut={(e) => handleHover(e, "iziDropdownOption")}
         >
           {option}
         </div>
@@ -75,78 +67,145 @@ export default function IziDropdown({
     })
   }
 
-  function handleHover(e: any) {
-    const cleanedId = e?.target?.id.split("-")[0];
-    console.log(e.type, cleanedId);
-    if (e.type === "mouseout") {
-      return timeOutRef.current = setTimeout(() => {
-        setHoverStates(null)
-      }, 100000);
+  function handleHover(e: any, custom = null) {
+    const cleanedId = e.target.id && e.target.id.split("-")[0];
+    console.log(e.type, cleanedId, e.target.id, custom, (cleanedId !== "" || custom !== null));
+    if (e.type === "mouseout" && (cleanedId !== "" || custom !== null)) {
+      setTimeOut(true)
     }
-    if (hoverStates === cleanedId || cleanedId === "") return;
+    if (cleanedId === "" && custom === null) return;
     if (e.type === "mouseover") {
-      clearTimeout(timeOutRef.current);
-      setHoverStates(cleanedId)
+      setTimeOut(false)
+      setHoverStates(custom ? custom : cleanedId)
     }
   }
 
-  // console.log(hoverStates);
+  useEffect(() => {
+    const time = setTimeout(() => {
+      if (timeOut) {
+        setHoverStates(null)
+        setTimeOut(false)
+      }
+    }, 50);
+
+    return () => {
+      clearTimeout(time);
+    }
+  }, [timeOut])
+
 
   const customIziDropdownContainer = {
     ...styles.iziDropdownContainer,
-    border: "5px solid transparent"
+    // border: "5px solid transparent"
   }
+
+  function isOverflown(elementIndex) {
+    const elements = []
+    document.querySelectorAll(".sc-gswNZR.iWlbdk>span").forEach((element, index) => {
+      return elements.push(element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth)
+    })
+
+    return elements[elementIndex]
+  }
+
+  useEffect(() => {
+    const elements = []
+    document.querySelectorAll(".sc-gswNZR.iWlbdk>span").forEach((element, index) => {
+      return elements.push(element)
+    })
+    if (showMore[0] && elements[0]) {
+      elements[0].style.maxHeight = "none"
+    }
+    if (showMore[1] && elements[1]) {
+      elements[1].style.maxHeight = "none"
+    }
+    if (!showMore[0] && elements[0]) {
+      elements[0].style.maxHeight = "300px"
+    }
+    if (!showMore[1] && elements[1]) {
+      elements[1].style.maxHeight = "290px"
+    }
+    setOverFlown({
+      0: isOverflown(0),
+      1: isOverflown(1),
+    })
+  }, [showMore])
 
   return (
     <>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "300px", background: "rgb(213,2,223)", background: "linear-gradient(180deg, rgba(213,2,223,1) 0%, rgba(147,0,186,1) 0%, rgba(0,143,172,1) 100%)" }}>
+      {/* @ts-ignore */}
+      <div className='component-container'>
         <PropertyControls openStates={openStates} setOpenStates={setOpenStates} styles={styles} setProperty={setProperty} />
-        {/* <div style={{ backgroundColor: "white", display: "flex", flexDirection: "column", zIndex: "100" }}>
-          <HexColorPicker color={styles.iziDropdownContainer.backgroundColor} onChange={(e) => setProperty("iziDropdownContainer", "backgroundColor", e)} />
-          <button onClick={() => setOpenStates({ ...openStates, [key]: { ...openStates[key], [valueKey]: false } })}>Save</button>
-        </div> */}
         <ControlInterface openStates={openStates} setOpenStates={setOpenStates} hoverStates={hoverStates} handleHover={handleHover}>
-        <div
-          style={customIziDropdownContainer}
-          id="iziDropdownContainer"
-          onMouseOver={(e) => handleHover(e)}
-          onMouseOut={(e) => handleHover(e)}
-
-        >
-          <span
-            style={styles.iziDropdownSelected}
-            id="iziDropdownSelected"
+          <div
+            style={styles.iziDropdownContainer}
+            id="iziDropdownContainer"
             onMouseOver={(e) => handleHover(e)}
+            onMouseOut={(e) => handleHover(e)}
+
           >
-            {selectedOption}
-          </span>
-          {open &&
-            <div
-              style={styles.iziDropdownOptionContainer}
-              id="iziDropdownOptionContainer"
+            <span
+              style={styles.iziDropdownSelected}
+              id="iziDropdownSelected"
               onMouseOver={(e) => handleHover(e)}
+              onMouseOut={(e) => handleHover(e)}
             >
-              {iziOptions()}
-            </div>
-          }
-        </div>
+              {selectedOption}
+            </span>
+            {open &&
+              <div
+                style={styles.iziDropdownOptionContainer}
+                id="iziDropdownOptionContainer"
+                onMouseOver={(e) => handleHover(e)}
+                onMouseOut={(e) => handleHover(e)}
+              >
+                {iziOptions()}
+              </div>
+            }
+          </div>
         </ControlInterface>
       </div>
-      <div style={{ height: "100%", padding: "30px", backgroundColor: "white", color: "black" }}>
-        <code>
-          {stylesToCss(styles)}
-        </code>
-        <br /><br />
-        <code>
-          <div>{`<div className='iziDropdownContainer' onClick={setOpen}>`}</div>
-          <div className='indentation1'> {`<p className='iziDropdownSelected'>{selectedOption}</p>`}</div>
-          <div className='indentation2'>{`{open &&`}</div>
-          <div className='indentation3'> {` <div className='iziDropdownOptionContainer'>`}</div>
-          <div className='indentation4'>  {` {iziOptions()} `}</div>
-          <div className='indentation3'> {`</div>`} </div>
-          <div className='indentation2'>{`}`}</div>
-          {`</div>`}
-        </code>
+      <div className="component-docs">
+        <div className='component-docs-container'>
+          <div className="component-docs-inner">
+            <h1>CSS</h1>
+            <CopyBlock
+              language="css"
+              text={stylesToCss(styles)}
+              showLineNumbers={true}
+              theme={atomOneDark}
+              codeBlock
+            />
+            {overFlown[0] && !showMore[0] &&
+              <div className='code-block-show-more' onClick={() => setShowMore(prev => ({ ...prev, 0: true }))}>
+                Show more
+              </div>}
+            {showMore[0] &&
+              <div className='code-block-show-more' onClick={() => setShowMore(prev => ({ ...prev, 0: false }))}>
+                Show less
+              </div>}
+          </div>
+        </div>
+        <div className='component-docs-container'>
+          <div className="component-docs-inner">
+            <h1>JSX</h1>
+            <CopyBlock
+              language="jsx"
+              text={codeMarkup}
+              showLineNumbers={true}
+              theme={atomOneDark}
+              codeBlock
+            />
+            {overFlown[1] && !showMore[1] &&
+              <div className='code-block-show-more' onClick={() => setShowMore(prev => ({ ...prev, 1: true }))}>
+                Show more
+              </div>}
+            {showMore[1] &&
+              <div className='code-block-show-more' onClick={() => setShowMore(prev => ({ ...prev, 1: false }))}>
+                Show less
+              </div>}
+          </div>
+        </div>
       </div>
     </>
   )

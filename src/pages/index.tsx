@@ -20,7 +20,6 @@ const initialState = {
   styles: {
     iziDropdownContainer: {
       backgroundColor: "white",
-      color: "black",
       width: "300px",
       height: "60px",
       position: "relative",
@@ -69,6 +68,8 @@ export default function Home() {
   const [selectedOption, setSelectedOption] = useState("Select an option");
   const [state, dispatch] = useReducer(reducer, initialState);
   const { styles } = state;
+  console.log({ styles });
+
   function setProperty(element, property, value) {
     dispatch({ type: "setProperty", element: element, property: property, value: value });
   }
