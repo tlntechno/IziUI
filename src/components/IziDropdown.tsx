@@ -12,7 +12,8 @@ export default function IziDropdown({
   open,
   selectedOption,
   styles,
-  setProperty
+  setProperty,
+  styleOptions,
 }) {
 
   const [openStates, setOpenStates] = useState(openStatesCalc(styles))
@@ -26,24 +27,15 @@ export default function IziDropdown({
     0: false,
     1: false,
   })
-  const codeMarkup = `
-  <div className='iziDropdownContainer' onClick={setOpen}>
+  const codeMarkup = `<div className='iziDropdownContainer' onClick={setOpen}>
     <p className='iziDropdownSelected'>{selectedOption}</p>
     {open &&
       <div className='iziDropdownOptionContainer'>
         {iziOptions()}
       </div>
     }
-  </div>
-  <div className='iziDropdownContainer' onClick={setOpen}>
-    <p className='iziDropdownSelected'>{selectedOption}</p>
-    {open &&
-      <div className='iziDropdownOptionContainer'>
-        {iziOptions()}
-      </div>
-    }
-  </div>
-  `
+</div>
+`
 
   function iziOptions() {
     return options.map((option, index) => {
@@ -93,12 +85,6 @@ export default function IziDropdown({
     }
   }, [timeOut])
 
-
-  const customIziDropdownContainer = {
-    ...styles.iziDropdownContainer,
-    // border: "5px solid transparent"
-  }
-
   function isOverflown(elementIndex) {
     const elements = []
     document.querySelectorAll(".sc-gswNZR.iWlbdk>span").forEach((element, index) => {
@@ -109,21 +95,37 @@ export default function IziDropdown({
   }
 
   useEffect(() => {
-    const elements = []
-    document.querySelectorAll(".sc-gswNZR.iWlbdk>span").forEach((element, index) => {
-      return elements.push(element)
+    const div = []
+    const span = []
+    document.querySelectorAll(".sc-gswNZR.iWlbdk").forEach((element, index) => {
+      return div.push(element)
     })
-    if (showMore[0] && elements[0]) {
-      elements[0].style.maxHeight = "none"
+    document.querySelectorAll(".sc-gswNZR.iWlbdk>span").forEach((element, index) => {
+      return span.push(element)
+    })
+    if (showMore[0] && div[0]) {
+      div[0].style.maxHeight = "none"
     }
-    if (showMore[1] && elements[1]) {
-      elements[1].style.maxHeight = "none"
+    if (showMore[1] && div[1]) {
+      div[1].style.maxHeight = "none"
     }
-    if (!showMore[0] && elements[0]) {
-      elements[0].style.maxHeight = "300px"
+    if (!showMore[0] && div[0]) {
+      div[0].style.maxHeight = "300px"
     }
-    if (!showMore[1] && elements[1]) {
-      elements[1].style.maxHeight = "290px"
+    if (!showMore[1] && div[1]) {
+      div[1].style.maxHeight = "300px"
+    }
+    if (showMore[0] && span[0]) {
+      span[0].style.maxHeight = "none"
+    }
+    if (showMore[1] && span[1]) {
+      span[1].style.maxHeight = "none"
+    }
+    if (!showMore[0] && span[0]) {
+      span[0].style.maxHeight = "285px"
+    }
+    if (!showMore[1] && span[1]) {
+      span[1].style.maxHeight = "285px"
     }
     setOverFlown({
       0: isOverflown(0),
@@ -135,8 +137,8 @@ export default function IziDropdown({
     <>
       {/* @ts-ignore */}
       <div className='component-container'>
-        <PropertyControls openStates={openStates} setOpenStates={setOpenStates} styles={styles} setProperty={setProperty} />
-        <ControlInterface openStates={openStates} setOpenStates={setOpenStates} hoverStates={hoverStates} handleHover={handleHover}>
+        <PropertyControls openStates={openStates} setOpenStates={setOpenStates} styles={styles} styleOptions={styleOptions} setProperty={setProperty} />
+        <ControlInterface openStates={openStates} setOpenStates={setOpenStates} hoverStates={hoverStates} handleHover={handleHover} styleOptions={styleOptions}>
           <div
             style={styles.iziDropdownContainer}
             id="iziDropdownContainer"

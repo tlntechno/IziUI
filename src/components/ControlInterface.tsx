@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { FaArrowsAltH, FaArrowsAltV, FaCompressArrowsAlt, FaExpandArrowsAlt } from 'react-icons/fa';
 import { MdRoundedCorner } from 'react-icons/md';
 
-export default function ControlInterface({ children, openStates, setOpenStates, hoverStates, handleHover }) {
+export default function ControlInterface({ children, openStates, setOpenStates, hoverStates, handleHover, styleOptions }) {
     const [controls, setControls] = useState([])
 
     const openTrueFalse = []
@@ -15,13 +15,13 @@ export default function ControlInterface({ children, openStates, setOpenStates, 
 
     function addControls(child) {
         if (!child.props || !child.props.id) return null;
-        const childId = child.props.id;
+        const childId = child.props.id; // "iziExampleExample"
         const cleanedId = childId.split("-")[0];
-        // console.log(cleanedId);
+        const childStyles = Object.keys(child.props.style); // ["backgroundColor", "color", "width", "height", "borderRadius", "padding", "margin"]
+        const childStyleValues = Object.values(child.props.style); // ["#ffffff", "#000000", "300px", "300px", "0px", "0px", "0px"]
 
-        const childStyles = Object.keys(child.props.style);
-        const childStyleValues = Object.values(child.props.style);
         const controls = childStyles.map((style: string) => {
+            if (!styleOptions[cleanedId][style]) return null;
             function icon() {
                 let icon = null
                 switch (style) {
@@ -48,7 +48,7 @@ export default function ControlInterface({ children, openStates, setOpenStates, 
                 }
                 return (
                     <>
-                        <div style={{ position: "absolute", inset: "0", backgroundColor: "transparent", width: "100%", height: "100%" }} id={childId + "-controls"}
+                        <div style={{ position: "absolute", inset: "0", backgroundColor: "transparent", width: "100%", height: "100%", zIndex: "10" }} id={childId + "-controls"}
                             onMouseOver={(e) => { e.stopPropagation(); handleHover(e); console.log("hovered", e.target) }}></div>
                         {icon}
                     </>
@@ -97,22 +97,18 @@ export default function ControlInterface({ children, openStates, setOpenStates, 
                 key={childId}
                 id={childId + "-controls"}
                 onMouseOver={(e) => { e.stopPropagation(); handleHover(e) }}
-                style={{ display: "flex", flexDirection: "row", transform: "translate(-20px, -50%)", position: "absolute", top: "0" }}
-            // style={{ display: "flex", flexDirection: "row", transform: "translate(-10px, -50%)", position: childStyleValues.includes("absolute") ? "absolute" : "relative" }}
+                style={{ display: "flex", flexDirection: "row", alignItems: "center", transform: "translate(-10px, -52%)", position: "absolute", top: "0", height: "40px" }}
             >
                 {controls}
             </div>
         )
-
-        // const newChildren = cloneElement(child, { children: [child.props.children, controlsContainer] })
-
         return controlsContainer;
     }
 
-    function recursiveMap(children, root = false) {
-        // console.log({ children });
-
+    function recursiveMap(children) {
         if (!Array.isArray(children)) {
+            console.log(children.props);
+
             if (!children.props) return children;
             if (children.props.children && Array.isArray(children.props.children)) {
                 const controls = addControls(children);
@@ -140,7 +136,7 @@ export default function ControlInterface({ children, openStates, setOpenStates, 
                     key
                 });
             }
-            else if (children.props.children && typeof children.props.children === "object") {
+            else if (children.props.children && (typeof children.props.children === "object" || typeof children.props.children === "string" || typeof children.props.children === "number")) {
                 const childWithControls = addControls(children);
                 const key = children.props.id + uuidv4();
                 return cloneElement(children, {
@@ -148,7 +144,12 @@ export default function ControlInterface({ children, openStates, setOpenStates, 
                     key
                 });
             }
-            return addControls(children);
+            const childWithControls = addControls(children);
+            const key = children.props.id + uuidv4();
+            return cloneElement(children, {
+                children: childWithControls,
+                key
+            });
         }
         else {
             return children.map((child) => {
@@ -170,13 +171,14 @@ export default function ControlInterface({ children, openStates, setOpenStates, 
     }
 
     useEffect(() => {
-        setControls(recursiveMap(children, true))
+        setControls(recursiveMap(children))
     }, [openStates, children])
+    console.log(recursiveMap(children));
 
 
     return (
-        <div>
-            {recursiveMap(children, true)}
+        <div onMouseOver={(e) => handleHover(e)} onMouseOut={(e) => handleHover(e)}>
+            {recursiveMap(children)}
         </div>
     )
 }

@@ -3,18 +3,22 @@ import { HexColorPicker } from "react-colorful";
 import { v4 as uuidv4 } from 'uuid';
 import ReactSlider from 'react-slider'
 
-export default function PropertyControls({ openStates, setOpenStates, styles, setProperty }) {
+export default function PropertyControls({ openStates, setOpenStates, styles, styleOptions, setProperty }) {
     const controls = useMemo(() => {
         function renderPropertyControls() {
-            console.log("rendering property controls");
-
             const openStatesArray = Object.entries(openStates);
-
-            return openStatesArray.map((openState, index) => {
-                const key = openState[0];
-                const value = openState[1];
+            return openStatesArray.map((openState) => {
+                const key = openState[0]; // iziDropdownContainer
+                const value = openState[1]; // { backgroundColor: true, ... }
+                console.log({ key, value });
+                
+                
                 const valueArray = Object.keys(value);
                 const controls = valueArray.map((valueKey) => {
+                    
+                    if (!styleOptions[key][valueKey]) {
+                        return null;
+                    }
                     switch (valueKey) {
                         case "backgroundColor":
                         case "color":
@@ -43,9 +47,10 @@ export default function PropertyControls({ openStates, setOpenStates, styles, se
                                                 className="horizontal-slider"
                                                 thumbClassName="horizontal-slider-thumb"
                                                 trackClassName="horizontal-slider-track"
-                                                min={300}
-                                                max={1000}
-                                                onChange={(e) => setProperty(key, valueKey, e)}
+                                                min={styleOptions[key][valueKey].min}
+                                                max={styleOptions[key][valueKey].max}
+                                                defaultValue={styles[key][valueKey].replace("px", "")}
+                                                onChange={(e) => setProperty(key, valueKey, e + "px")}
                                                 renderThumb={(props, state) => <div {...props}></div>}
                                             />
                                             <button onClick={() => setOpenStates({ ...openStates, [key]: { ...openStates[key], [valueKey]: false } })}>Save</button>
@@ -73,7 +78,7 @@ export default function PropertyControls({ openStates, setOpenStates, styles, se
     }, [openStates])
 
     function renderCurrentValue() {
-        return Object.entries(openStates).map((openState, index) => {
+        return Object.entries(openStates).map((openState) => {
             const key = openState[0];
             const value = openState[1];
             const valueArray = Object.keys(value);
@@ -90,7 +95,7 @@ export default function PropertyControls({ openStates, setOpenStates, styles, se
                     case "padding":
                     case "margin":
                         return (
-                            openStates[key][valueKey] && <div key={uuidv4()}>{styles[key][valueKey]}px</div>
+                            openStates[key][valueKey] && <div key={uuidv4()}>{styles[key][valueKey]}</div>
                         )
                     default:
                         return (
