@@ -6,7 +6,8 @@ import ControlInterface from './ControlInterface'
 import PropertyControls from './PropertyControls'
 
 export default function Izi({ children, styles, styleOptions, setProperty, jsx }) {
-    const [openStates, setOpenStates] = useState(openStatesCalc(styles))
+    const initialOpenStates = openStatesCalc(styles)
+    const [openStates, setOpenStates] = useState(initialOpenStates)
     const [hoverStates, setHoverStates] = useState(null)
     const [timeOut, setTimeOut] = useState(true)
     const [showMore, setShowMore] = useState({
@@ -20,7 +21,6 @@ export default function Izi({ children, styles, styleOptions, setProperty, jsx }
 
     function handleHover(e: any, custom = null) {
         const cleanedId = e.target.id && e.target.id.split("-")[0];
-        console.log(e.type, cleanedId, e.target.id, custom, (cleanedId !== "" || custom !== null));
         if (e.type === "mouseout" && (cleanedId !== "" || custom !== null)) {
             setTimeOut(true)
         }
@@ -96,7 +96,14 @@ export default function Izi({ children, styles, styleOptions, setProperty, jsx }
     return (
         <>
             <div className='component-container'>
-                <PropertyControls styles={styles} styleOptions={styleOptions} setProperty={setProperty} openStates={openStates} setOpenStates={openStates} />
+                <PropertyControls
+                    styles={styles}
+                    styleOptions={styleOptions}
+                    setProperty={setProperty}
+                    openStates={openStates}
+                    setOpenStates={setOpenStates}
+                    initialOpenStates={initialOpenStates}
+                />
                 <ControlInterface styleOptions={styleOptions} openStates={openStates} setOpenStates={setOpenStates} hoverStates={hoverStates} handleHover={handleHover}>
                     {children}
                 </ControlInterface>

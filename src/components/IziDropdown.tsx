@@ -61,7 +61,7 @@ export default function IziDropdown({
 
   function handleHover(e: any, custom = null) {
     const cleanedId = e.target.id && e.target.id.split("-")[0];
-    console.log(e.type, cleanedId, e.target.id, custom, (cleanedId !== "" || custom !== null));
+    // console.log(e.type, cleanedId, e.target.id, custom, (cleanedId !== "" || custom !== null));
     if (e.type === "mouseout" && (cleanedId !== "" || custom !== null)) {
       setTimeOut(true)
     }

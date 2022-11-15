@@ -15,6 +15,7 @@ export default function ControlInterface({ children, openStates, setOpenStates, 
 
     function addControls(child) {
         if (!child.props || !child.props.id) return null;
+
         const childId = child.props.id; // "iziExampleExample"
         const cleanedId = childId.split("-")[0];
         const childStyles = Object.keys(child.props.style); // ["backgroundColor", "color", "width", "height", "borderRadius", "padding", "margin"]
@@ -107,8 +108,6 @@ export default function ControlInterface({ children, openStates, setOpenStates, 
 
     function recursiveMap(children) {
         if (!Array.isArray(children)) {
-            console.log(children.props);
-
             if (!children.props) return children;
             if (children.props.children && Array.isArray(children.props.children)) {
                 const controls = addControls(children);
@@ -173,8 +172,6 @@ export default function ControlInterface({ children, openStates, setOpenStates, 
     useEffect(() => {
         setControls(recursiveMap(children))
     }, [openStates, children])
-    console.log(recursiveMap(children));
-
 
     return (
         <div onMouseOver={(e) => handleHover(e)} onMouseOut={(e) => handleHover(e)}>
